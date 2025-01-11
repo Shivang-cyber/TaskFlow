@@ -70,7 +70,7 @@ const EmailVerification = catchAsync(async (req, res, next) => {
   await newUser.save();
   await registrationEmail(newUser.userName, newUser.email);
 
-  res.status(200).json({ message: "Email verified successfully." });
+  res.status(200).json({ status: 'success', message: "Email verified successfully." });
 });
 
 const login = catchAsync(async (req, res, next) => {
@@ -101,7 +101,7 @@ const login = catchAsync(async (req, res, next) => {
 
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
 
-  res.status(200).json({ token });
+  res.status(200).json({ status: 'success', message: token });
 });
 
 const forgotPassword = catchAsync(async (req, res, next) => {
@@ -117,9 +117,9 @@ const forgotPassword = catchAsync(async (req, res, next) => {
 
   const token = jwt.sign({ id: newUser.id }, JWT_SECRET, { expiresIn: '1h' });
   
-  await passwordResetEmail(newUser.userName, newUser.email, token);
+  await passwordResetEmail(newUser.email, newUser.userName,  token);
 
-  res.status(200).json({ message: "Password reset email sent." });
+  res.status(200).json({ status: 'success', message: "Password reset email sent." });
 });
 
 const resetPassword = catchAsync(async (req, res, next) => {
@@ -141,7 +141,35 @@ const resetPassword = catchAsync(async (req, res, next) => {
   newUser.password = newPassword;
   await newUser.save();
 
-  res.status(200).json({ message: "Password reset successfully." });
+  res.status(200).json({ status:'success', message: "Password reset successfully." });
 });
 
-module.exports = { signUp, EmailVerification, login, forgotPassword, resetPassword };
+const authentication = catchAsync(async (req, res, next) => {
+  if(!req.headers.authorization || !req.headers.authorization.startsWith("Bearer")) {
+    return next(new AppError("Authorization header is required.", 400));
+  }
+
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return next(new AppError("Token is required.", 400));
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (!decoded.user_id) {
+      return next(new AppError("Invalid token payload.", 400));
+    }
+
+    const newUser = await user.findByPk(decoded.user_id);
+    if (!newUser) {
+      return next(new AppError("Invalid token or user does not exist.", 400));
+    }
+
+    req.user = newUser;
+    next();
+  } catch (error) {
+    return next(new AppError("Invalid token.", 400));
+  }
+});
+
+module.exports = { signUp, EmailVerification, login, forgotPassword, resetPassword, authentication };

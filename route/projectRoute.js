@@ -1,8 +1,23 @@
-const router = require('express').Router();
-const { createProject, updateProject, deleteProject } = require('../controller/project.controller');
+const router = require("express").Router();
+const { authentication } = require("../controller/authController");
+const {
+  createProject,
+  updateProject,
+  deleteProject,
+  getAllProjects,
+  getProjectsByUserId,
+} = require("../controller/project.controller");
 
-router.route("/createProject").post(createProject);
-router.route("/updateProject/:projectId").put(updateProject);
-router.route("/deleteProject/:projectId").delete(deleteProject);
+router
+  .route("/")
+  .get(authentication, getProjectsByUserId)
+  .post(authentication, createProject);
+
+router
+  .route("/:projectId")
+  .put(authentication, updateProject)
+  .delete(authentication, deleteProject);
+
+router.route("/all").get(getAllProjects);
 
 module.exports = router;

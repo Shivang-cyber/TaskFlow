@@ -10,7 +10,7 @@ const createProject = catchAsync(async (req, res) => {
     description: body.description,
     category: body.category,
     tags: body.tags,
-    createdBy: body.userId,
+    createdBy: req.user.dataValues.id,
     productImage: body.productImage,
   });
   return res.status(201).json({ status: "success", message: Project });
@@ -22,7 +22,22 @@ const updateProject = catchAsync(async (req, res) => {
 
   const exisitingProject = await project.findOne({ where: { id: projectId } });
 
-  const Project = await project.update(
+  if (!exisitingProject) {
+    return res
+      .status(404)
+      .json({ status: "error", message: "Project not found" });
+  }
+
+  if (exisitingProject.createdBy !== req.user.dataValues.id) {
+    return res
+      .status(403)
+      .json({
+        status: "error",
+        message: "You are not authorized to update this project",
+      });
+  }
+
+  await project.update(
     {
       title: body.title || exisitingProject.title,
       shortDescription:
@@ -35,12 +50,30 @@ const updateProject = catchAsync(async (req, res) => {
     { where: { id: projectId } }
   );
 
-  return res.status(200).json({ status: "success", message: "Project Updated Successfully" });
+  return res
+    .status(200)
+    .json({ status: "success", message: "Project Updated Successfully" });
 });
 
 const deleteProject = catchAsync(async (req, res) => {
   const projectId = req.params.projectId;
 
+  const exisitingProject = await project.findOne({ where: { id: projectId } });
+
+  if (!exisitingProject) {
+    return res
+      .status(404)
+      .json({ status: "error", message: "Project not found" });
+  }
+
+  if (exisitingProject.createdBy !== req.user.dataValues.id) {
+    return res
+      .status(403)
+      .json({
+        status: "error",
+        message: "You are not authorized to delete this project",
+      });
+  }
   await project.update(
     {
       active: false,
@@ -53,8 +86,23 @@ const deleteProject = catchAsync(async (req, res) => {
     .json({ status: "success", message: "Project deleted successfully" });
 });
 
+const getProjectsByUserId = catchAsync(async (req, res) => {
+  const userId = req.user.dataValues.id;
+
+  const Projects = await project.findAll({ where: { createdBy: userId } });
+
+  return res.status(200).json({ status: "success", message: Projects });
+});
+
+const getAllProjects = catchAsync(async (req, res) => {
+  const Projects = await project.findAll();
+  return res.status(200).json({ status: "success", message: Projects });
+});
+
 module.exports = {
   createProject,
   updateProject,
   deleteProject,
+  getProjectsByUserId,
+  getAllProjects,
 };
