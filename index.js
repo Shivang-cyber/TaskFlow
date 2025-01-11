@@ -6,10 +6,12 @@ const authRoute = require("./route/authRoute");
 const catchAsync = require("./utils/catchAsync");
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controller/errorController");
+const projectRoute = require("./route/projectRoute");
 
 app.use(express.json());
 
 app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/project", projectRoute);
 
 app.use(
   "*",
