@@ -42,15 +42,8 @@ const updateTask = catchAsync(async (req, res, next) => {
   }
 
   if (
-    req.user.dataValues.id !== existingTask.assignedTo ||
-    req.user.dataValues.id !== existingTask.createdBy
+    ![existingTask.assignedTo,existingTask.createdBy].includes(req.user.dataValues.id)
   ) {
-    return next(
-      new AppError("You are not authorized to update this task", 403)
-    );
-  }
-
-  if (existingTask.createdBy !== req.user.dataValues.id) {
     return next(
       new AppError("You are not authorized to update this task", 403)
     );
