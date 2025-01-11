@@ -13,6 +13,7 @@ const registrationEmail = async (username, email) => {
 };
 
 const passwordResetEmail = async (email, username, resetLink) => {
+  console.log("🚀 ~ passwordResetEmail ~ email, username, resetLink:", email, username, resetLink)
   const mailText = `Hi ${username},\n\nPlease click the link below to reset your password:\n${resetLink}\n\nBest regards,\nThe TaskFlow Team`;
   const mailBody = `<p>Hi ${username},</p><p>Please click the link below to reset your password:</p><a href="${resetLink}" target="_blank" rel="noopener noreferrer">Reset Password</a><p>Best regards,<br>The TaskFlow Team</p>`;
   await sendEmail(email, "Password Reset", mailText, mailBody);

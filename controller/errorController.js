@@ -35,6 +35,9 @@ const sendErrorProd = (err, res) => {
 };
 
 const globalErrorHandler = (err, req, res, next) => {
+    if(err.name === 'JsonWebTokenError'){
+        err = new AppError('Invalid token. Please login again', 401);
+    }
     if(err.name === 'SequelizeValidationError'){
         err = new AppError(err.errors[0].message, 400);
     }
