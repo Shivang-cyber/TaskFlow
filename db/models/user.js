@@ -1,42 +1,82 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const bcrypt = require("bcrypt");
+const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../../config/database");
-const Sequelize = require('sequelize');
+const AppError = require("../../utils/appError");
 
-const user = sequelize.define('user', {
-  id: {
-    allowNull: false,
-    primaryKey: true,
-    type: Sequelize.UUID,  
-    defaultValue: Sequelize.UUIDV4,  
+const user = sequelize.define(
+  "user",
+  {
+    id: {
+      allowNull: false,
+      primaryKey: true,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+    },
+    userName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: "Username is required.",
+        },
+        notEmpty: {
+          msg: "Username is required.",
+        }
+      },
+    },
+    email: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
+      validate: {
+        isEmail: {
+          msg: "Invalid email.",
+        },
+        notNull: {
+          msg: "Email is required.",
+        },
+        notEmpty: {
+          msg: "Email is required.",
+        }
+      },
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: "Password is required.",
+        },
+        notEmpty: {
+          msg: "Password is required.",
+        }
+      },
+      set(value) {
+        if(value.length < 8){
+          throw new AppError("Password must be at least 8 characters long.", 400);
+        }
+        this.setDataValue("password", bcrypt.hashSync(value, 10));
+      }
+    },
+    isVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
+    },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
+    },
   },
-  userName: {
-    type: Sequelize.STRING
-  },
-  email: {
-    type: Sequelize.STRING
-  },
-  password: {
-    type: Sequelize.STRING
-  },
-  isVerified: {
-    type: Sequelize.BOOLEAN,
-    defaultValue: false
-  },
-  createdAt: {
-    allowNull: false,
-    type: Sequelize.DATE
-  },
-  updatedAt: {
-    allowNull: false,
-    type: Sequelize.DATE
+  {
+    freezeTableName: true,
+    modelName: "user",
   }
-}, {
-  freezeTableName: true,
-  modelName: 'user',
-});
-
+);
 
 module.exports = user;
