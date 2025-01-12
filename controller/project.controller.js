@@ -1,7 +1,8 @@
 const catchAsync = require("../utils/catchAsync");
 const project = require("../db/models/project");
+const AppError = require("../utils/appError");
 
-const createProject = catchAsync(async (req, res) => {
+const createProject = catchAsync(async (req, res, next) => {
   const body = req.body;
 
   const Project = await project.create({
@@ -16,25 +17,18 @@ const createProject = catchAsync(async (req, res) => {
   return res.status(201).json({ status: "success", message: Project });
 });
 
-const updateProject = catchAsync(async (req, res) => {
+const updateProject = catchAsync(async (req, res, next) => {
   const body = req.body;
   const projectId = req.params.projectId;
 
   const exisitingProject = await project.findOne({ where: { id: projectId } });
 
   if (!exisitingProject) {
-    return res
-      .status(404)
-      .json({ status: "error", message: "Project not found" });
+    return next(new AppError("Project not found", 404));
   }
 
   if (exisitingProject.createdBy !== req.user.dataValues.id) {
-    return res
-      .status(403)
-      .json({
-        status: "error",
-        message: "You are not authorized to update this project",
-      });
+    return next(new AppError("You are not authorized to update this project", 403));
   }
 
   await project.update(
@@ -55,24 +49,17 @@ const updateProject = catchAsync(async (req, res) => {
     .json({ status: "success", message: "Project Updated Successfully" });
 });
 
-const deleteProject = catchAsync(async (req, res) => {
+const deleteProject = catchAsync(async (req, res, next) => {
   const projectId = req.params.projectId;
 
   const exisitingProject = await project.findOne({ where: { id: projectId } });
 
   if (!exisitingProject) {
-    return res
-      .status(404)
-      .json({ status: "error", message: "Project not found" });
+    return next(new AppError("Project not found", 404));
   }
 
   if (exisitingProject.createdBy !== req.user.dataValues.id) {
-    return res
-      .status(403)
-      .json({
-        status: "error",
-        message: "You are not authorized to delete this project",
-      });
+    return next(new AppError("You are not authorized to delete this project", 403));
   }
   await project.update(
     {
@@ -86,7 +73,7 @@ const deleteProject = catchAsync(async (req, res) => {
     .json({ status: "success", message: "Project deleted successfully" });
 });
 
-const getProjectsByUserId = catchAsync(async (req, res) => {
+const getProjectsByUserId = catchAsync(async (req, res, next) => {
   const userId = req.user.dataValues.id;
 
   const Projects = await project.findAll({ where: { createdBy: userId } });
@@ -94,7 +81,7 @@ const getProjectsByUserId = catchAsync(async (req, res) => {
   return res.status(200).json({ status: "success", message: Projects });
 });
 
-const getAllProjects = catchAsync(async (req, res) => {
+const getAllProjects = catchAsync(async (req, res, next) => {
   const Projects = await project.findAll();
   return res.status(200).json({ status: "success", message: Projects });
 });
