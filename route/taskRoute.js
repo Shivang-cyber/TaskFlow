@@ -3,6 +3,7 @@ const { authentication } = require("../controller/authController");
 const {
   createTask,
   updateTask,
+  getTaskByProjectId
 } = require("../controller/taskController");
 
 /**
@@ -34,7 +35,7 @@ const {
  *                 description: Description of the task
  *               assignedTo:
  *                 type: string
- *                 description: User ID of the person assigned to the task/ if not provided then Creator of the task will be assigned
+ *                 description: User ID of the person assigned to the task. If not provided, the creator of the task will be assigned
  *     responses:
  *       201:
  *         description: Task created successfully
@@ -45,7 +46,7 @@ const {
  *               properties:
  *                 status:
  *                   type: string
- *                   example: 0=Todo,1=Pending,2=Done
+ *                   example: "0=Todo, 1=Pending, 2=Done"
  *                 message:
  *                   type: object
  *                   properties:
@@ -126,7 +127,55 @@ router.route("/").post(authentication, createTask);
  *         description: Not authorized to update this task
  */
 
-
 router.route("/:taskId").put(authentication, updateTask);
+
+/**
+ * @swagger
+ * /api/v1/task/{projectId}:
+ *   get:
+ *     summary: Get all tasks of a project
+ *     description: Get all tasks of a project based on the project ID.
+ *     tags:
+ *       - Tasks
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: projectId
+ *         in: path
+ *         description: ID of the project to get tasks
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Tasks fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       title:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       assignedTo:
+ *                         type: string
+ *                       createdBy:
+ *                         type: string
+ *                       projectId:
+ *                         type: string
+ *       404:
+ *         description: Project not found
+ */
+
+router.route("/:projectId").get(authentication, getTaskByProjectId);
 
 module.exports = router;

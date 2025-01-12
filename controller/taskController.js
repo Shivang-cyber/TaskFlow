@@ -64,7 +64,14 @@ const updateTask = catchAsync(async (req, res, next) => {
     .json({ status: "success", message: "Task Updated Successfully" });
 });
 
+const getTaskByProjectId = catchAsync(async (req, res, next) => {
+  const projectId = req.params.projectId;
+  const tasks = await task.findAll({ where: { projectId: projectId } });
+  return res.status(200).json({ status: "success", message: tasks });
+});
+
 module.exports = {
   createTask,
   updateTask,
+  getTaskByProjectId,
 };

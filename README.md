@@ -1,106 +1,187 @@
 # TaskFlow
 
-TaskFlow is a task management application designed to help you organize and manage your tasks efficiently. This README file provides detailed instructions on setting up the project, as well as an overview of the available routes and their functionalities.
+TaskFlow is a task management application that helps you organize and manage your tasks efficiently. This README provides comprehensive documentation for setting up, configuring, and using the application.
 
 ## Table of Contents
+
+- [Features](#features)
 - [Installation](#installation)
 - [Configuration](#configuration)
-- [Usage](#usage)
-- [API Routes](#api-routes)
+- [API Documentation](#api-documentation)
+  - [Authentication](#authentication)
+  - [Projects](#projects)
+  - [Tasks](#tasks)
+  - [User Project Management](#user-project-management)
 - [Contributing](#contributing)
 - [License](#license)
 
+## Features
+
+- User authentication and authorization
+- Project management with categories and tags
+- Task creation and assignment
+- Email verification system
+- Password reset functionality
+- User project invitations and collaborations
+
 ## Installation
 
-To get started with TaskFlow, follow these steps:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/TaskFlow.git
+   cd TaskFlow
+   ```
 
-1. **Clone the repository:**
-    ```bash
-    git clone https://github.com/yourusername/TaskFlow.git
-    cd TaskFlow
-    ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-2. **Install dependencies:**
-    ```bash
-    npm install
-    ```
+3. Set up the database:
+   - Ensure you have MongoDB installed locally or use MongoDB Atlas
+   - Configure your connection string in the environment variables
 
-3. **Set up the database:**
-    Ensure you have a running instance of MongoDB. You can use a local instance or a cloud-based service like MongoDB Atlas.
-
-4. **Configure environment variables:**
-    Create a `.env` file in the root directory and add the following variables:
-    ```env
-    PORT=3000
-    MONGODB_URI=your_mongodb_connection_string
-    JWT_SECRET=your_jwt_secret
-    ```
+4. Configure environment variables:
+   Create a `.env` file in the root directory with the following variables:
+   ```env
+   PORT=3000
+   MONGODB_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret
+   ```
 
 ## Configuration
 
-TaskFlow uses environment variables for configuration. Make sure to set the following variables in your `.env` file:
+The application uses the following environment variables:
 
-- `PORT`: The port on which the server will run.
-- `MONGODB_URI`: The connection string for your MongoDB database.
-- `JWT_SECRET`: A secret key for signing JSON Web Tokens.
+| Variable      | Description                              | Required |
+|--------------|------------------------------------------|----------|
+| PORT         | Server port number                       | Yes      |
+| MONGODB_URI  | MongoDB connection string                | Yes      |
+| JWT_SECRET   | Secret key for JWT token generation      | Yes      |
 
-## Usage
-
-To start the application, run the following command:
-
-```bash
-npm start
-```
-
-The server will start on the port specified in the `.env` file. By default, it will run on `http://localhost:3000`.
-
-## API Routes
+## API Documentation
 
 ### Authentication
 
-- **POST /api/auth/register**
-  - Registers a new user.
-  - Request body: `{ "username": "string", "password": "string" }`
-  - Response: `{ "message": "User registered successfully" }`
+#### User Registration
+- **POST** `/api/v1/auth/signup`
+- Creates a new user account
+- Request body:
+  ```json
+  {
+    "username": "string",
+    "email": "string",
+    "password": "string"
+  }
+  ```
 
-- **POST /api/auth/login**
-  - Authenticates a user and returns a JWT token.
-  - Request body: `{ "username": "string", "password": "string" }`
-  - Response: `{ "token": "jwt_token" }`
+#### Email Verification
+- **GET** `/api/v1/auth/verify-email?token={token}`
+- Verifies user email address using the provided token
+
+#### User Login
+- **POST** `/api/v1/auth/login`
+- Authenticates user and returns JWT token
+- Request body:
+  ```json
+  {
+    "email": "string",
+    "password": "string"
+  }
+  ```
+
+#### Password Reset
+- **POST** `/api/v1/auth/forgot-password`
+- Initiates password reset process
+- **POST** `/api/v1/auth/reset-password`
+- Completes password reset with token
+
+### Projects
+
+#### List Projects
+- **GET** `/api/v1/project`
+- Retrieves authenticated user's projects
+- Requires JWT token in Authorization header
+
+#### Create Project
+- **POST** `/api/v1/project/create`
+- Creates new project
+- Request body:
+  ```json
+  {
+    "title": "string",
+    "shortDescription": "string",
+    "description": "string",
+    "category": ["string"],
+    "tags": ["string"],
+    "productImage": "string"
+  }
+  ```
+
+#### Update Project
+- **PUT** `/api/v1/project/update/:projectId`
+- Updates existing project
+- Requires project ID and JWT token
+
+#### Delete Project
+- **DELETE** `/api/v1/project/delete/:projectId`
+- Removes project
+- Requires project ID and JWT token
 
 ### Tasks
 
-- **GET /api/tasks**
-  - Retrieves all tasks for the authenticated user.
-  - Headers: `{ "Authorization": "Bearer jwt_token" }`
-  - Response: `[{ "id": "string", "title": "string", "description": "string", "status": "string" }]`
+#### List Tasks
+- **GET** `/api/v1/task/:projectId`
+- Retrieves all tasks for a specific project
+- Requires project ID and JWT token
 
-- **POST /api/tasks**
-  - Creates a new task.
-  - Headers: `{ "Authorization": "Bearer jwt_token" }`
-  - Request body: `{ "title": "string", "description": "string", "status": "string" }`
-  - Response: `{ "message": "Task created successfully" }`
+#### Create Task
+- **POST** `/api/v1/task`
+- Creates new task in project
+- Request body:
+  ```json
+  {
+    "projectId": "string",
+    "title": "string",
+    "description": "string",
+    "assignedTo": "string"
+  }
+  ```
 
-- **PUT /api/tasks/:id**
-  - Updates an existing task.
-  - Headers: `{ "Authorization": "Bearer jwt_token" }`
-  - Request body: `{ "title": "string", "description": "string", "status": "string" }`
-  - Response: `{ "message": "Task updated successfully" }`
+#### Update Task
+- **PUT** `/api/v1/task/:taskId`
+- Updates existing task
+- Supports status changes: Todo (0), Pending (1), Done (2)
 
-- **DELETE /api/tasks/:id**
-  - Deletes a task.
-  - Headers: `{ "Authorization": "Bearer jwt_token" }`
-  - Response: `{ "message": "Task deleted successfully" }`
+### User Project Management
+
+#### Accept Project Invitation
+- **POST** `/api/v1/userProject/accept-invitation`
+- Accepts invitation to join project
+- Requires userProjectId parameter
+
+#### Add User to Project
+- **POST** `/api/v1/userProject/add-user`
+- Adds user to project
+- Request body:
+  ```json
+  {
+    "userId": "string",
+    "projectId": "string"
+  }
+  ```
 
 ## Contributing
 
-We welcome contributions to TaskFlow! To contribute, follow these steps:
+We welcome contributions to TaskFlow! Please follow these steps:
 
-1. Fork the repository.
-2. Create a new branch: `git checkout -b feature/your-feature-name`.
-3. Make your changes and commit them: `git commit -m 'Add some feature'`.
-4. Push to the branch: `git push origin feature/your-feature-name`.
-5. Open a pull request.
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature-name`
+3. Commit your changes: `git commit -m 'Add some feature'`
+4. Push to the branch: `git push origin feature/your-feature-name`
+5. Submit a pull request
+
+Please ensure your code follows our coding standards and includes appropriate tests.
 
 ## License
 
