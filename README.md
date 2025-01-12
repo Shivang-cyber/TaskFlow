@@ -28,7 +28,7 @@ TaskFlow is a task management application that helps you organize and manage you
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/TaskFlow.git
+   git clone https://github.com/Shivang-cyber/TaskFlow.git
    cd TaskFlow
    ```
 
