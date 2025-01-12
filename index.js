@@ -9,8 +9,12 @@ const globalErrorHandler = require("./controller/errorController");
 const projectRoute = require("./route/projectRoute");
 const taskRoute = require("./route/taskRoute");
 const userProjectRoute = require("./route/userProjectRoute");
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swaggerConfig');
 
 app.use(express.json());
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/project", projectRoute);
@@ -28,4 +32,5 @@ app.use(globalErrorHandler);
 
 app.listen(port, () => {
   console.log(`app listening at http://localhost:${port}`);
+  console.log(`Swagger docs available at http://localhost:${port}/api-docs`);
 });
