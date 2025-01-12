@@ -1,3 +1,4 @@
+require("dotenv").config({ path: `${process.cwd()}/.env` });
 const user = require("../db/models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -39,7 +40,7 @@ const signUp = catchAsync(async (req, res, next) => {
     { expiresIn: "24h" }
   );
 
-  const verificationLink = `http://localhost:3000/api/v1/auth/verify-email?token=${verificationToken}`;
+  const verificationLink = `${process.env.BACKEND_URL}/api/v1/auth/verify-email?token=${verificationToken}`;
 
   await verifyEmail(newUser.username, verificationLink, newUser.email);
 
