@@ -53,11 +53,18 @@ TaskFlow is a task management application that helps you organize and manage you
 
 The application uses the following environment variables:
 
-| Variable      | Description                              | Required |
-|--------------|------------------------------------------|----------|
-| PORT         | Server port number                       | Yes      |
-| MONGODB_URI  | MongoDB connection string                | Yes      |
-| JWT_SECRET   | Secret key for JWT token generation      | Yes      |
+| Variable      | Description                                | Required |
+|---------------|--------------------------------------------|----------|
+|PORT                  | Server port number	                 | Yes      |
+|DB_HOST	           | Database host	                     | Yes      |
+|DB_USER	           | Database user	                     | Yes      |
+|DB_PASSWORD           | Database password	                 | Yes      |
+|DB_NAME	           | Database name	                     | Yes      |
+|JWT_SECRET	           | Secret key for JWT token generation | Yes      |
+|SENDGRID_USER_EMAIL   | SendGrid user email	             | Yes      |
+|SENDGRID_API_KEY	   | SendGrid API key	                 | Yes      |
+|NODE_ENV	           | Node environment                    | Yes      |
+|BACKEND_URL	       | Backend URL	                     | Yes      |
 
 ## API Documentation
 
